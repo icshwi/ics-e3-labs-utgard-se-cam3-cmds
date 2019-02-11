@@ -6,9 +6,14 @@ require sequencer,2.1.21+
 require sscan,1339922+
 require calc,3.7.0+
 require autosave,5.9.0+
+require iocStats,ae5d083
 
 epicsEnvSet("CAMERA_ID", "18481996")
-epicsEnvSet("PREFIX_PV", "labs-utg-se:cam3:")
+epicsEnvSet("AREA", "labs-utg-se")
+epicsEnvSet("DEVICE", "cam3")
+
+epicsEnvSet("PREFIX_PV", "$(AREA):$(DEVICE):")
+epicsEnvSet("IOCNAME", "$(AREA)-$(DEVICE)")
 epicsEnvSet("CAM", "")
 epicsEnvSet("IMAGE", "image1:")
 
@@ -18,6 +23,7 @@ epicsEnvSet("AS_TOP", "/epics/autosave")
 
 epicsEnvSet("ADPOINTGREY", "/home/iocuser/e3/e3-ADPointGrey/ADPointGrey")
 epicsEnvSet("ADCORE", "/home/iocuser/e3/e3-ADCore/ADCore")
+epicsEnvSet("AUTOSAVE", "")
 
 epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES","64000000")
 
@@ -48,8 +54,6 @@ asynSetTraceIOMask($(PORT), 0, 2)
 ###asynSetTraceFile($(PORT), 0, "asynTrace.out")
 ###asynSetTraceInfoMask($(PORT), 0, 0xf)
 
-iocshLoad("autosave.iocsh")
-
 dbLoadRecords("pointGrey.db", "P=$(PREFIX_PV),R=$(CAM),PORT=$(PORT),ADDR=0,TIMEOUT=1")
 dbLoadRecords("pointGrey-ess.db", "P=$(PREFIX_PV),R=$(CAM),PORT=$(PORT)")
 
@@ -62,7 +66,11 @@ dbLoadRecords("NDStdArrays.template", "P=$(PREFIX_PV),R=$(IMAGE),PORT=Image1,ADD
 
 ### Load all other plugins using commonPlugins.cmd
 
+epicsEnvSet(PREFIX, "$(PREFIX_PV)")
 < $(ADCORE)/../cmds/commonPlugins.cmd
+
+iocshLoad("$(autosave_DIR)/autosave.iocsh")
+iocshLoad("$(iocStats_DIR)/iocStats.iocsh")
 
 iocInit()
 
